@@ -1,4 +1,4 @@
-watchtower
+/bin/
 vendor
 .glide
 dist
