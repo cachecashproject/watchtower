@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/containrrr/watchtower/actions"
-	"github.com/containrrr/watchtower/container"
-	"github.com/containrrr/watchtower/container/mocks"
+	"github.com/cachecashproject/watchtower/actions"
+	"github.com/cachecashproject/watchtower/container"
+	"github.com/cachecashproject/watchtower/container/mocks"
 	"github.com/docker/docker/api/types"
 
 	cli "github.com/docker/docker/client"

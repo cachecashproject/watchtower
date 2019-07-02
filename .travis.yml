@@ -22,7 +22,7 @@ before_script:
 - go get -u golang.org/x/lint/golint
 
 script:
-- go build
+- make
 - go test -v -race ./...
 - golint -set_exit_status ./...
 - docker build .

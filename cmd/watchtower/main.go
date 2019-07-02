@@ -1,4 +1,4 @@
-package main // import "github.com/containrrr/watchtower"
+package main // import "github.com/cachecashproject/watchtower"
 
 import (
 	"os"
@@ -8,10 +8,10 @@ import (
 
 	"strconv"
 
-	"github.com/containrrr/watchtower/actions"
-	cliApp "github.com/containrrr/watchtower/app"
-	"github.com/containrrr/watchtower/container"
-	"github.com/containrrr/watchtower/notifications"
+	"github.com/cachecashproject/watchtower/actions"
+	cliApp "github.com/cachecashproject/watchtower/app"
+	"github.com/cachecashproject/watchtower/container"
+	"github.com/cachecashproject/watchtower/notifications"
 	"github.com/robfig/cron"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"

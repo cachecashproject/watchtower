@@ -1,0 +1,41 @@
+syntax = "proto3";
+package grpcmsg;
+
+// ------------------------
+// Common structs
+// ------------------------
+
+message Error {
+    uint64 code = 1;
+    string message = 2;
+}
+
+message PublicKey {
+    // TODO: Add an enum for key type.
+    bytes public_key = 1; // Must be exactly 33 bytes.
+
+}
+
+// ------------------------
+// (Cache/Publisher)<->Update protocol
+// ------------------------
+
+service NodeUpdate {
+    rpc CheckForUpdates(UpdateCheckRequest) returns (UpdateCheckResponse) {}
+}
+
+message UpdateCheckRequest {
+    string pubkey = 1;
+    repeated ContainerImage current_images = 2;
+}
+
+message ContainerImage {
+    string name = 1;
+    string version = 2;
+}
+
+message UpdateCheckResponse {
+    map<string, string> expected_images = 1;
+}
+
+// ------------------------

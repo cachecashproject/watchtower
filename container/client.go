@@ -2,10 +2,11 @@ package container
 
 import (
 	"fmt"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
 	"io/ioutil"
 	"time"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
@@ -71,7 +72,7 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 		types.ContainerListOptions{
 			Filters: filter,
 		})
-	
+
 	if err != nil {
 		return nil, err
 	}
