@@ -33,6 +33,8 @@ func (u *UpdateServer) CheckForUpdates(ctx context.Context, req *grpcmsg.UpdateC
 	}
 
 	return &grpcmsg.UpdateCheckResponse{
-		ExpectedImages: map[string]string{},
+		ExpectedImages: map[string]string{
+			"cachecash/go-cachecash:dev": "sha256:b488870aeadcb51bd8719122ceeb7e09a40d4745d471c8fef22aeb8800040fb9",
+		},
 	}, nil
 }

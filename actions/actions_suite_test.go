@@ -168,6 +168,10 @@ func (client mockClient) RemoveImage(c container.Container) error {
 	return nil
 }
 
+func (client mockClient) PullImageBySha(ref string, sha string, tag string) error {
+	return nil
+}
+
 func (client mockClient) IsContainerStale(c container.Container) (bool, error) {
 	panic("Not implemented")
 }

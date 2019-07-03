@@ -2,6 +2,7 @@ package actions
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/cachecashproject/watchtower/client"
@@ -45,17 +46,20 @@ func Update(cl container.Client, params UpdateParams) error {
 	}
 
 	for i, container := range containers {
-		_, ok := updates[container.ImageName()]
+		update, ok := updates[container.ImageName()]
 		if ok {
-			log.Infof("Update service flagged image outdated: %s. Restarting %s.", container.ImageName(), container.Name())
+			log.Infof("Update service flagged container outdated: %s. Pulling update for %s.", container.Name(), container.ImageName())
 
-			stale, err := cl.IsContainerStale(container)
+			s := strings.Split(container.ImageName(), ":")
+			ref, tag := s[0], s[1]
+
+			err = cl.PullImageBySha(ref, update, tag)
 			if err != nil {
-				log.Infof("Unable to update container %s. Proceeding to next.", containers[i].Name())
-				log.Debug(err)
-				stale = false
+				log.Errorf("Unable to pull container, skipping.")
+				containers[i].Stale = false
+			} else {
+				containers[i].Stale = true
 			}
-			containers[i].Stale = stale
 		}
 	}
 
