@@ -19,6 +19,7 @@ type Application interface {
 // ConfigFile holds the configuration of our server
 type ConfigFile struct {
 	GrpcAddr string `json:"grpc_addr"`
+	Database string `json:"database"`
 }
 
 type application struct {

@@ -1,13 +1,18 @@
 package main // import "github.com/cachecashproject/watchtower"
 
 import (
+	"database/sql"
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/cachecashproject/watchtower/common"
+	"github.com/cachecashproject/watchtower/database/migrations"
 	"github.com/cachecashproject/watchtower/server"
+	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
+	migrate "github.com/rubenv/sql-migrate"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,6 +33,7 @@ func loadConfigFile(l *logrus.Logger, path string) (*server.ConfigFile, error) {
 	}
 
 	conf.GrpcAddr = p.GetString("grpc_addr", ":4000")
+	conf.Database = p.GetString("database", "host=127.0.0.1 port=5432 user=postgres dbname=updates sslmode=disable")
 
 	return &conf, nil
 }
@@ -46,16 +52,14 @@ func mainC() error {
 	log.SetFlags(0)
 
 	l := logrus.New()
-	/*
-		if err := common.ConfigureLogger(l, &common.LoggerConfig{
-			LogLevelStr: *logLevelStr,
-			LogCaller:   *logCaller,
-			LogFile:     *logFile,
-			Json:        true,
-		}); err != nil {
-			return errors.Wrap(err, "failed to configure logger")
-		}
-	*/
+	if err := common.ConfigureLogger(l, &common.LoggerConfig{
+		LogLevelStr: *logLevelStr,
+		LogCaller:   *logCaller,
+		LogFile:     *logFile,
+		Json:        true,
+	}); err != nil {
+		return errors.Wrap(err, "failed to configure logger")
+	}
 	l.Info("Starting watchtower update server version:unknown")
 
 	cf, err := loadConfigFile(l, *configPath)
@@ -63,7 +67,41 @@ func mainC() error {
 		return errors.Wrap(err, "failed to load configuration file")
 	}
 
-	u, err := server.NewUpdateServer(l)
+	if cf.Database == "" {
+		return errors.New("database connection isn't configured")
+	}
+
+	db, err := sql.Open("postgres", cf.Database)
+	if err != nil {
+		return errors.Wrap(err, "failed to connect to database")
+	}
+
+	deadline := time.Now().Add(5 * time.Minute)
+	for {
+		err = db.Ping()
+
+		if err == nil {
+			// connected successfully
+			break
+		} else if time.Now().Before(deadline) {
+			// connection failed, try again
+			l.Info("Connection failed, trying again shortly")
+			time.Sleep(250 * time.Millisecond)
+		} else {
+			// connection failed too many times, giving up
+			return errors.Wrap(err, "database ping failed")
+		}
+	}
+	l.Info("connected to database")
+
+	l.Info("applying migrations")
+	n, err := migrate.Exec(db, "postgres", migrations.Migrations, migrate.Up)
+	if err != nil {
+		return errors.Wrap(err, "failed to apply migrations")
+	}
+	l.Infof("applied %d migrations", n)
+
+	u, err := server.NewUpdateServer(l, db)
 	if err != nil {
 		return nil
 	}
