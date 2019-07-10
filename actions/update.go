@@ -7,6 +7,8 @@ import (
 
 	"github.com/cachecashproject/watchtower/client"
 	"github.com/cachecashproject/watchtower/container"
+	"github.com/cachecashproject/watchtower/status"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -16,11 +18,12 @@ var (
 
 // UpdateParams contains all different options available to alter the behavior of the Update func
 type UpdateParams struct {
-	Filter      container.Filter
-	Cleanup     bool
-	NoRestart   bool
-	Timeout     time.Duration
-	MonitorOnly bool
+	Filter         container.Filter
+	Cleanup        bool
+	NoRestart      bool
+	Timeout        time.Duration
+	MonitorOnly    bool
+	StatusEndpoint string
 }
 
 // Update looks at the running Docker containers to see if any of the images
@@ -40,7 +43,13 @@ func Update(cl container.Client, params UpdateParams) error {
 		return err
 	}
 
-	updates, err := updateClient.CheckForUpdates(containers)
+	identity, err := status.FetchPublicKeyIdentity(params.StatusEndpoint)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get identity from status page")
+	}
+	log.Infof("Identifiying to update server as: %v", identity)
+
+	updates, err := updateClient.CheckForUpdates(containers, identity)
 	if err != nil {
 		return err
 	}

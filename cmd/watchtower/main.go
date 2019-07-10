@@ -26,14 +26,15 @@ var commit = "unknown"
 var date = "unknown"
 
 var (
-	client       container.Client
-	scheduleSpec string
-	cleanup      bool
-	noRestart    bool
-	monitorOnly  bool
-	enableLabel  bool
-	notifier     *notifications.Notifier
-	timeout      time.Duration
+	client         container.Client
+	scheduleSpec   string
+	cleanup        bool
+	noRestart      bool
+	monitorOnly    bool
+	enableLabel    bool
+	notifier       *notifications.Notifier
+	timeout        time.Duration
+	statusEndpoint string
 )
 
 func init() {
@@ -162,11 +163,12 @@ func runUpgradesOnSchedule(filter container.Filter) error {
 func runUpdatesWithNotifications(filter container.Filter) {
 	notifier.StartNotification()
 	updateParams := actions.UpdateParams{
-		Filter:      filter,
-		Cleanup:     cleanup,
-		NoRestart:   noRestart,
-		Timeout:     timeout,
-		MonitorOnly: monitorOnly,
+		Filter:         filter,
+		Cleanup:        cleanup,
+		NoRestart:      noRestart,
+		Timeout:        timeout,
+		MonitorOnly:    monitorOnly,
+		StatusEndpoint: statusEndpoint,
 	}
 	err := actions.Update(client, updateParams)
 	if err != nil {
@@ -210,4 +212,5 @@ func readFlags(c *cli.Context) {
 	noRestart = c.GlobalBool("no-restart")
 	monitorOnly = c.GlobalBool("monitor-only")
 	timeout = c.GlobalDuration("stop-timeout")
+	statusEndpoint = c.GlobalString("status-endpoint")
 }

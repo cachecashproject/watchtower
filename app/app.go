@@ -164,5 +164,10 @@ func SetupCliFlags(app *cli.App) {
 			Usage:  "Will also include created and exited containers",
 			EnvVar: "WATCHTOWER_INCLUDE_STOPPED",
 		},
+		cli.StringFlag{
+			Name:   "status-endpoint",
+			Usage:  "Fetch an identity public key from an endpoint",
+			EnvVar: "WATCHTOWER_STATUS_ENDPOINT",
+		},
 	}
 }

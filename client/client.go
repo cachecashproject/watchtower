@@ -34,7 +34,7 @@ func NewUpdateClient(l *logrus.Logger, addr string) (*Client, error) {
 }
 
 // CheckForUpdates submits a list of running containers to check for pending updates
-func (cl *Client) CheckForUpdates(containers []container.Container) (map[string]string, error) {
+func (cl *Client) CheckForUpdates(containers []container.Container, pubkey string) (map[string]string, error) {
 	ctx := context.Background()
 
 	images := []*grpcmsg.ContainerImage{}
@@ -47,7 +47,7 @@ func (cl *Client) CheckForUpdates(containers []container.Container) (map[string]
 	}
 
 	resp, err := cl.grpcClient.CheckForUpdates(ctx, &grpcmsg.UpdateCheckRequest{
-		Pubkey:        "TODO-publickey",
+		Pubkey:        pubkey,
 		CurrentImages: images,
 	})
 	if err != nil {
