@@ -10,13 +10,15 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// LoggerConfig holds settings to setup logging
 type LoggerConfig struct {
 	LogLevelStr string
 	LogCaller   bool
 	LogFile     string
-	Json        bool
+	JSON        bool
 }
 
+// ConfigureLogger is setting up logging with the given config
 func ConfigureLogger(l *logrus.Logger, c *LoggerConfig) error {
 	logLevel, err := logrus.ParseLevel(c.LogLevelStr)
 	if err != nil {
@@ -25,7 +27,7 @@ func ConfigureLogger(l *logrus.Logger, c *LoggerConfig) error {
 	l.SetLevel(logLevel)
 	l.SetReportCaller(c.LogCaller)
 
-	if c.Json {
+	if c.JSON {
 		l.SetFormatter(&logrus.JSONFormatter{})
 	}
 

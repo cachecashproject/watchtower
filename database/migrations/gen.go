@@ -8,6 +8,7 @@ import (
 )
 
 var (
+	// Migrations to setup the database
 	Migrations = &migrate.PackrMigrationSource{
 		Box: packr.NewBox("."),
 	}
