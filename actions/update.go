@@ -24,6 +24,7 @@ type UpdateParams struct {
 	Timeout        time.Duration
 	MonitorOnly    bool
 	StatusEndpoint string
+	UpdateServer   string
 }
 
 // Update looks at the running Docker containers to see if any of the images
@@ -38,7 +39,7 @@ func Update(cl container.Client, params UpdateParams) error {
 		return err
 	}
 
-	updateClient, err := client.NewUpdateClient(log.New(), "127.0.0.1:4000")
+	updateClient, err := client.NewUpdateClient(log.New(), params.UpdateServer)
 	if err != nil {
 		return err
 	}

@@ -35,6 +35,7 @@ var (
 	notifier       *notifications.Notifier
 	timeout        time.Duration
 	statusEndpoint string
+	updateServer   string
 )
 
 func init() {
@@ -169,6 +170,7 @@ func runUpdatesWithNotifications(filter container.Filter) {
 		Timeout:        timeout,
 		MonitorOnly:    monitorOnly,
 		StatusEndpoint: statusEndpoint,
+		UpdateServer:   updateServer,
 	}
 	err := actions.Update(client, updateParams)
 	if err != nil {
@@ -213,4 +215,5 @@ func readFlags(c *cli.Context) {
 	monitorOnly = c.GlobalBool("monitor-only")
 	timeout = c.GlobalDuration("stop-timeout")
 	statusEndpoint = c.GlobalString("status-endpoint")
+	updateServer = c.GlobalString("update-server")
 }
