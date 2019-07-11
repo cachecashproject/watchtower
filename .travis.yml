@@ -1,14 +1,22 @@
+# Use the fast container-based test runner instead of the slow VM-based runner.
+sudo: false
 language: go
-
-env:
-- GO111MODULE=on
 
 go:
 - 1.12.x
 
+env:
+- GO111MODULE=on
+
+# Skip the install step. Don't `go get` dependencies. Only build with the code in vendor/.
+install: true
+
 notifications:
   # Don't email the results of the test runs.
   email: false
+  # Notify us in Slack.  Generated with `travis encrypt` per the docs.
+  slack:
+    secure: pxAiQlrMZorCmOdEheXTKlN6EfjNTa6S9Cw5MTz5ZwQG2s3iP1SxScGKZyu9FCNx5quuxIknbeIxK7wvOIUxftVWBBAYOjokRFJ++syvmozG9dNFbkKMg68PRald5o7r9EJDzqlPycpZxoBDTiwqEtaVt86LZT7R3l0xCcaDNWb2tG0aSkdRw7Kl3IAOZLwyQ7UI0k8G0ZaPLSc12S/FUC6CCGu0qKYescm3kgnHaIItGInDd5CRTNPzSb+bA8sbrxGYM9RsOv3JsANpIvj1JfBByh7ELVr0G99qQPD3ZLyiTF0ghASfn5YBzoRpC7/B8wi/yOrFBJtWzdIFytnJ/sV/lfMzTb3MNA78ju2Ef9UR1ikrpm+R0shpTn3UU8coxTVy0IGWCaZTA7bhheHyfD4ZT+7gnNx6CUeBMlN3HzRF/b7DbCY3blissRI93KuPhn9Zy2xFs2kUEk3YAlMxGru0KYaThKkNMf4IQ0ox+WHfZ/P7/HNTm5J7upmECWS+C2LmEM2mFV91FRrbWeqxKHrElz9Na36GMJCo5GhzlOSKC3tGKCXjU+rY1dGR4lfhOcIwK2/FdN1H3Grfjw0W6NCGvZ2hDaR3n9pesoz34MX8qH2EzmpVmuWBUSY2a4oC9kBEqrPKqBGOz0dHDhHb0GwLze5MVQaCWOEEMCYc+68=
 
 before_script:
 - go get -u golang.org/x/lint/golint
