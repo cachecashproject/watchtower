@@ -33,7 +33,7 @@ var _ Application = (*application)(nil)
 func NewApplication(l *logrus.Logger, u *UpdateServer, conf *ConfigFile) (Application, error) {
 	updateServer, err := newUpdateServer(l, u, conf)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create bootstrap server")
+		return nil, errors.Wrap(err, "failed to create update server")
 	}
 
 	return &application{
@@ -44,14 +44,14 @@ func NewApplication(l *logrus.Logger, u *UpdateServer, conf *ConfigFile) (Applic
 
 func (a *application) Start() error {
 	if err := a.updateServer.Start(); err != nil {
-		return errors.Wrap(err, "failed to start bootstrap server")
+		return errors.Wrap(err, "failed to start update server")
 	}
 	return nil
 }
 
 func (a *application) Shutdown(ctx context.Context) error {
 	if err := a.updateServer.Shutdown(ctx); err != nil {
-		return errors.Wrap(err, "failed to shut down bootstrap server")
+		return errors.Wrap(err, "failed to shut down update server")
 	}
 	return nil
 }

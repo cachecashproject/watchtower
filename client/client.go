@@ -8,6 +8,7 @@ import (
 	"github.com/cachecashproject/watchtower/grpcmsg"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"google.golang.org/grpc"
 )
 
 // Client for our grpc watchtower update server
@@ -17,12 +18,20 @@ type Client struct {
 }
 
 // NewUpdateClient creates an Client to query for updates
-func NewUpdateClient(l *logrus.Logger, addr string) (*Client, error) {
+func NewUpdateClient(l *logrus.Logger, addr string, enableInsecureTransport bool) (*Client, error) {
 	// XXX: Should not create a new connection for each attempt.
-	l.Info("dialing bootstrap service: ", addr)
-	conn, err := common.GRPCDial(addr)
+	l.Info("dialing update service: ", addr)
+
+	var conn *grpc.ClientConn
+	var err error
+
+	if enableInsecureTransport {
+		conn, err = common.GRPCDialInsecureTransport(addr)
+	} else {
+		conn, err = common.GRPCDial(addr)
+	}
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to dial bootstrap service")
+		return nil, errors.Wrap(err, "failed to dial update service")
 	}
 
 	grpcClient := grpcmsg.NewNodeUpdateClient(conn)

@@ -174,5 +174,10 @@ func SetupCliFlags(app *cli.App) {
 			Usage:  "Address for our watchtower update server (eg. 127.0.0.1:4000)",
 			EnvVar: "WATCHTOWER_UPDATE_SERVER",
 		},
+		cli.BoolFlag{
+			Name:   "enable-insecure-transport",
+			Usage:  "Enable insecure grpc transport to update server",
+			EnvVar: "WATCHTOWER_ENABLE_INSECURE_TRANSPORT",
+		},
 	}
 }
