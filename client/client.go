@@ -20,7 +20,7 @@ type Client struct {
 // NewUpdateClient creates an Client to query for updates
 func NewUpdateClient(l *logrus.Logger, addr string, enableInsecureTransport bool) (*Client, error) {
 	// XXX: Should not create a new connection for each attempt.
-	l.Info("dialing update service: ", addr)
+	l.Info("Dialing update service: ", addr)
 
 	var conn *grpc.ClientConn
 	var err error
@@ -62,6 +62,7 @@ func (cl *Client) CheckForUpdates(containers []container.Container, pubkey strin
 	if err != nil {
 		return nil, err
 	}
+	cl.l.Infof("Received %d pending updates", len(resp.ExpectedImages))
 
 	return resp.ExpectedImages, nil
 }
