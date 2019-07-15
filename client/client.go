@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"strings"
 
 	"github.com/cachecashproject/watchtower/common"
 	"github.com/cachecashproject/watchtower/container"
@@ -49,9 +50,18 @@ func (cl *Client) CheckForUpdates(containers []container.Container, pubkey strin
 	images := []*grpcmsg.ContainerImage{}
 
 	for _, c := range containers {
+		// our fallback string, digest isn't guaranteed to be available
+		version := "<unknown>"
+		imageDigests := c.ImageDigests()
+
+		if len(imageDigests) > 0 {
+			parts := strings.Split(imageDigests[0], "@")
+			version = parts[len(parts)-1]
+		}
+
 		images = append(images, &grpcmsg.ContainerImage{
 			Name:    c.ImageName(),
-			Version: c.ImageID(),
+			Version: version,
 		})
 	}
 
