@@ -2,10 +2,11 @@ package container
 
 import (
 	"fmt"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
 	"io/ioutil"
 	"time"
+
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/filters"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
@@ -25,6 +26,7 @@ type Client interface {
 	StopContainer(Container, time.Duration) error
 	StartContainer(Container) error
 	RenameContainer(Container, string) error
+	PullImageBySha(ref string, sha string, tag string) error
 	IsContainerStale(Container) (bool, error)
 	RemoveImage(Container) error
 }
@@ -71,7 +73,7 @@ func (client dockerClient) ListContainers(fn Filter) ([]Container, error) {
 		types.ContainerListOptions{
 			Filters: filter,
 		})
-	
+
 	if err != nil {
 		return nil, err
 	}
@@ -212,6 +214,55 @@ func (client dockerClient) RenameContainer(c Container, newName string) error {
 	return client.api.ContainerRename(bg, c.ID(), newName)
 }
 
+func (client dockerClient) PullImageBySha(ref string, sha string, tag string) error {
+	bg := context.Background()
+	refSha := ref + "@" + sha
+	refTag := ref + ":" + tag
+
+	log.Infof("Pulling new %s image (%s)", refTag, refSha)
+	err := client.pullImage(bg, refSha)
+	if err != nil {
+		return err
+	}
+
+	log.Infof("Tagging new image %s as %s", refSha, refTag)
+	err = client.api.ImageTag(bg, refSha, refTag)
+	if err != nil {
+		return err
+	}
+	log.Infof("Image has been updated: %s", refTag)
+
+	return nil
+}
+
+func (client dockerClient) pullImage(bg context.Context, imageName string) error {
+	var opts types.ImagePullOptions // ImagePullOptions can take a RegistryAuth arg to authenticate against a private registry
+	auth, err := EncodedAuth(imageName)
+	log.Debugf("Got auth value: %s", auth)
+	log.Debugf("Got image name: %s", imageName)
+	if err != nil {
+		log.Debugf("Error loading authentication credentials %s", err)
+		return err
+	} else if auth == "" {
+		log.Debugf("No authentication credentials found for %s", imageName)
+		opts = types.ImagePullOptions{} // empty/no auth credentials
+	} else {
+		opts = types.ImagePullOptions{RegistryAuth: auth, PrivilegeFunc: DefaultAuthHandler}
+	}
+
+	response, err := client.api.ImagePull(bg, imageName, opts)
+	if err != nil {
+		log.Debugf("Error pulling image %s, %s", imageName, err)
+		return err
+	}
+	defer response.Close()
+
+	// the pull request will be aborted prematurely unless the response is read
+	_, err = ioutil.ReadAll(response)
+
+	return err
+}
+
 func (client dockerClient) IsContainerStale(c Container) (bool, error) {
 	bg := context.Background()
 	oldImageInfo := c.imageInfo
@@ -219,30 +270,10 @@ func (client dockerClient) IsContainerStale(c Container) (bool, error) {
 
 	if client.pullImages {
 		log.Debugf("Pulling %s for %s", imageName, c.Name())
-
-		var opts types.ImagePullOptions // ImagePullOptions can take a RegistryAuth arg to authenticate against a private registry
-		auth, err := EncodedAuth(imageName)
-		log.Debugf("Got auth value: %s", auth)
-		log.Debugf("Got image name: %s", imageName)
+		err := client.pullImage(bg, imageName)
 		if err != nil {
-			log.Debugf("Error loading authentication credentials %s", err)
-			return false, err
-		} else if auth == "" {
-			log.Debugf("No authentication credentials found for %s", imageName)
-			opts = types.ImagePullOptions{} // empty/no auth credentials
-		} else {
-			opts = types.ImagePullOptions{RegistryAuth: auth, PrivilegeFunc: DefaultAuthHandler}
-		}
-
-		response, err := client.api.ImagePull(bg, imageName, opts)
-		if err != nil {
-			log.Debugf("Error pulling image %s, %s", imageName, err)
 			return false, err
 		}
-		defer response.Close()
-
-		// the pull request will be aborted prematurely unless the response is read
-		_, err = ioutil.ReadAll(response)
 	}
 
 	newImageInfo, _, err := client.api.ImageInspectWithRaw(bg, imageName)

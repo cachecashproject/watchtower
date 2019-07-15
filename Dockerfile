@@ -11,12 +11,14 @@ RUN apk add --no-cache \
     tzdata
 
 WORKDIR /usr/local/src
+
+COPY go.mod go.sum ./
+RUN GO111MODULE=on go mod download
+
 COPY . .
-
 RUN \
-  GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' . && \
+  GO111MODULE=on CGO_ENABLED=0 GOOS=linux go build -a -ldflags '-extldflags "-static"' ./cmd/watchtower/... && \
   GO111MODULE=on go test ./... -v
-
 
 #
 # watchtower

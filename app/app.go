@@ -164,5 +164,20 @@ func SetupCliFlags(app *cli.App) {
 			Usage:  "Will also include created and exited containers",
 			EnvVar: "WATCHTOWER_INCLUDE_STOPPED",
 		},
+		cli.StringFlag{
+			Name:   "status-endpoint",
+			Usage:  "Fetch an identity public key from an endpoint",
+			EnvVar: "WATCHTOWER_STATUS_ENDPOINT",
+		},
+		cli.StringFlag{
+			Name:   "update-server",
+			Usage:  "Address for our watchtower update server (eg. 127.0.0.1:4000)",
+			EnvVar: "WATCHTOWER_UPDATE_SERVER",
+		},
+		cli.BoolFlag{
+			Name:   "enable-insecure-transport",
+			Usage:  "Enable insecure grpc transport to update server",
+			EnvVar: "WATCHTOWER_ENABLE_INSECURE_TRANSPORT",
+		},
 	}
 }

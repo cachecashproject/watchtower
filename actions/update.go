@@ -2,9 +2,13 @@ package actions
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
-	"github.com/containrrr/watchtower/container"
+	"github.com/cachecashproject/watchtower/client"
+	"github.com/cachecashproject/watchtower/container"
+	"github.com/cachecashproject/watchtower/status"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -14,33 +18,60 @@ var (
 
 // UpdateParams contains all different options available to alter the behavior of the Update func
 type UpdateParams struct {
-	Filter container.Filter
-	Cleanup bool
-	NoRestart bool
-	Timeout time.Duration
-	MonitorOnly bool
+	Filter                  container.Filter
+	Cleanup                 bool
+	NoRestart               bool
+	Timeout                 time.Duration
+	MonitorOnly             bool
+	StatusEndpoint          string
+	UpdateServer            string
+	EnableInsecureTransport bool
 }
 
 // Update looks at the running Docker containers to see if any of the images
 // used to start those containers have been updated. If a change is detected in
 // any of the images, the associated containers are stopped and restarted with
 // the new image.
-func Update(client container.Client, params UpdateParams) error {
+func Update(cl container.Client, params UpdateParams) error {
 	log.Debug("Checking containers for updated images")
 
-	containers, err := client.ListContainers(params.Filter)
+	containers, err := cl.ListContainers(params.Filter)
+	if err != nil {
+		return err
+	}
+
+	updateClient, err := client.NewUpdateClient(log.New(), params.UpdateServer, params.EnableInsecureTransport)
+	if err != nil {
+		return err
+	}
+
+	identity, err := status.FetchPublicKeyIdentity(params.StatusEndpoint)
+	if err != nil {
+		return errors.Wrap(err, "Failed to get identity from status page")
+	}
+	log.Infof("Identifiying to update server as: %v", identity)
+
+	updates, err := updateClient.CheckForUpdates(containers, identity)
 	if err != nil {
 		return err
 	}
 
 	for i, container := range containers {
-		stale, err := client.IsContainerStale(container)
-		if err != nil {
-			log.Infof("Unable to update container %s. Proceeding to next.", containers[i].Name())
-			log.Debug(err)
-			stale = false
+		update, ok := updates[container.ImageName()]
+		if ok {
+			log.Infof("Update service flagged container outdated: %s. Pulling update for %s.", container.Name(), container.ImageName())
+
+			s := strings.Split(container.ImageName(), ":")
+			ref, tag := s[0], s[1]
+
+			err = cl.PullImageBySha(ref, update, tag)
+			if err != nil {
+				log.Errorf("Unable to pull container, skipping.")
+				containers[i].Stale = false
+			} else {
+				containers[i].Stale = true
+			}
 		}
-		containers[i].Stale = stale
 	}
 
 	containers, err = container.SortByDependencies(containers)
@@ -64,7 +95,7 @@ func Update(client container.Client, params UpdateParams) error {
 		}
 
 		if container.Stale {
-			if err := client.StopContainer(container, params.Timeout); err != nil {
+			if err := cl.StopContainer(container, params.Timeout); err != nil {
 				log.Error(err)
 			}
 		}
@@ -78,20 +109,20 @@ func Update(client container.Client, params UpdateParams) error {
 			// from re-using the same container name so we first rename the current
 			// instance so that the new one can adopt the old name.
 			if container.IsWatchtower() {
-				if err := client.RenameContainer(container, randName()); err != nil {
+				if err := cl.RenameContainer(container, randName()); err != nil {
 					log.Error(err)
 					continue
 				}
 			}
 
 			if !params.NoRestart {
-				if err := client.StartContainer(container); err != nil {
+				if err := cl.StartContainer(container); err != nil {
 					log.Error(err)
 				}
 			}
 
 			if params.Cleanup {
-				client.RemoveImage(container)
+				cl.RemoveImage(container)
 			}
 		}
 	}

@@ -1,13 +1,14 @@
 package container
 
 import (
-	"github.com/containrrr/watchtower/container/mocks"
+	"testing"
+
+	"github.com/cachecashproject/watchtower/container/mocks"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	cli "github.com/docker/docker/client"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	"testing"
 )
 
 func TestContainer(t *testing.T) {
@@ -23,8 +24,7 @@ var _ = Describe("the container", func() {
 			server := mocks.NewMockAPIServer()
 			docker, _ = cli.NewClientWithOpts(
 				cli.WithHost(server.URL),
-				cli.WithHTTPClient(server.Client(),
-				))
+				cli.WithHTTPClient(server.Client()))
 			client = dockerClient{
 				api:        docker,
 				pullImages: false,
