@@ -56,6 +56,12 @@ func (c Container) ImageID() string {
 	return c.imageInfo.ID
 }
 
+// ImageDigests returns the manifest digests. This is usually a single string,
+// but can be multiple or none at all.
+func (c Container) ImageDigests() []string {
+	return c.imageInfo.RepoDigests
+}
+
 // ImageName returns the name of the Docker image that was used to start the
 // container. If the original image was specified without a particular tag, the
 // "latest" tag is assumed.
