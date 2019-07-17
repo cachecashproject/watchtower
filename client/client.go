@@ -15,6 +15,7 @@ import (
 // Client for our grpc watchtower update server
 type Client struct {
 	l          *logrus.Logger
+	grpcConn   *grpc.ClientConn
 	grpcClient grpcmsg.NodeUpdateClient
 }
 
@@ -39,6 +40,7 @@ func NewUpdateClient(l *logrus.Logger, addr string, enableInsecureTransport bool
 
 	return &Client{
 		l:          l,
+		grpcConn:   conn,
 		grpcClient: grpcClient,
 	}, nil
 }
@@ -75,4 +77,9 @@ func (cl *Client) CheckForUpdates(containers []container.Container, pubkey strin
 	cl.l.Infof("Received %d pending updates", len(resp.ExpectedImages))
 
 	return resp.ExpectedImages, nil
+}
+
+// Close the grpc client
+func (cl *Client) Close() error {
+	return cl.grpcConn.Close()
 }

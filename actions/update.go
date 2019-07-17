@@ -44,6 +44,7 @@ func Update(cl container.Client, params UpdateParams) error {
 	if err != nil {
 		return err
 	}
+	defer updateClient.Close()
 
 	identity, err := status.FetchPublicKeyIdentity(params.StatusEndpoint)
 	if err != nil {
