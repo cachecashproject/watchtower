@@ -11,6 +11,7 @@ require (
 	github.com/bitly/go-hostpool v0.0.0-20171023180738-a3a6125de932 // indirect
 	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 // indirect
+	github.com/box-builder/box v0.5.7
 	github.com/bugsnag/bugsnag-go v1.5.3 // indirect
 	github.com/bugsnag/panicwrap v1.2.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
@@ -22,6 +23,7 @@ require (
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/docker/docker v0.0.0-20190404075923-dbe4a30928d4
 	github.com/docker/docker-credential-helpers v0.6.3 // indirect
+	github.com/docker/engine-api v0.4.0 // indirect
 	github.com/docker/go v1.5.1-1 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-metrics v0.0.0-20181218153428-b84716841b82 // indirect
@@ -70,7 +72,7 @@ require (
 	github.com/zmap/zcrypto v0.0.0-20191023172918-f1f7c0342eee // indirect
 	github.com/zmap/zlint v1.0.2 // indirect
 	golang.org/x/crypto v0.0.0-20191028145041-f83a4685e152 // indirect
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+	golang.org/x/net v0.0.0-20190724013045-ca1201d0de80
 	golang.org/x/sys v0.0.0-20191028164358-195ce5e7f934 // indirect
 	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
 	google.golang.org/appengine v1.6.5 // indirect
@@ -79,5 +81,6 @@ require (
 	gopkg.in/fatih/pool.v2 v2.0.0 // indirect
 	gopkg.in/gorethink/gorethink.v3 v3.0.5 // indirect
 	gopkg.in/gorp.v1 v1.7.2 // indirect
+	gopkg.in/src-d/go-git.v4 v4.13.1
 	gotest.tools v2.2.0+incompatible // indirect
 )

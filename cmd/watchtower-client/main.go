@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cachecashproject/watchtower/docker"
 	"github.com/cachecashproject/watchtower/grpcmsg"
+	"github.com/docker/docker/client"
 	"github.com/pkg/errors"
 	"github.com/urfave/cli"
 	"google.golang.org/grpc"
@@ -45,6 +47,13 @@ func main() {
 					ArgsUsage:   "[options] [tag]",
 					Usage:       "Updates the version of an image from its tag. You must have access to docker.",
 					Description: "Updates the version of an image from its tag. You must have access to docker.",
+					Action:      updateFromImage,
+					Flags: []cli.Flag{
+						cli.BoolFlag{
+							Name:  "no-pull, n",
+							Usage: "Do not pull the image before setting the digest",
+						},
+					},
 				},
 				{
 					Name:        "literal",
@@ -84,6 +93,37 @@ func getClient(ctx *cli.Context) (grpcmsg.UpdateControlClient, error) {
 	}
 
 	return grpcmsg.NewUpdateControlClient(cc), nil
+}
+
+func updateFromImage(ctx *cli.Context) error {
+	if len(ctx.Args()) != 1 {
+		return errors.New("invalid arguments; seek --help")
+	}
+
+	d, err := client.NewEnvClient()
+	if err != nil {
+		return errors.Wrap(err, "could not create docker client")
+	}
+
+	tag := ctx.Args()[0]
+
+	id, err := docker.FetchImage(context.Background(), d, tag, !ctx.Bool("no-pull"))
+	if err != nil {
+		return errors.Wrap(err, "while pulling image")
+	}
+
+	client, err := getClient(ctx)
+	if err != nil {
+		return errors.Wrap(err, "while constructing client")
+	}
+
+	_, err = client.SetLatestUpdate(context.Background(), &grpcmsg.ContainerImage{Name: tag, Version: id})
+	if err != nil {
+		return errors.Wrap(err, "failed to update")
+	}
+
+	fmt.Println("Update successful!")
+	return nil
 }
 
 func updateFromLiteral(ctx *cli.Context) error {
