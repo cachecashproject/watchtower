@@ -7,9 +7,13 @@ import (
 	context "context"
 	fmt "fmt"
 	proto "github.com/golang/protobuf/proto"
+	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	io "io"
 	math "math"
+	math_bits "math/bits"
 )
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -21,7 +25,7 @@ var _ = math.Inf
 // is compatible with the proto package it is being compiled against.
 // A compilation error at this line likely means your copy of the
 // proto package needs to be updated.
-const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type Error struct {
 	Code                 uint64   `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`
@@ -45,7 +49,7 @@ func (m *Error) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_Error.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +104,7 @@ func (m *PublicKey) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 		return xxx_messageInfo_PublicKey.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -148,7 +152,7 @@ func (m *UpdateCheckRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return xxx_messageInfo_UpdateCheckRequest.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -203,7 +207,7 @@ func (m *ContainerImage) XXX_Marshal(b []byte, deterministic bool) ([]byte, erro
 		return xxx_messageInfo_ContainerImage.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -257,7 +261,7 @@ func (m *UpdateCheckResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte,
 		return xxx_messageInfo_UpdateCheckResponse.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
-		n, err := m.MarshalTo(b)
+		n, err := m.MarshalToSizedBuffer(b)
 		if err != nil {
 			return nil, err
 		}
@@ -295,31 +299,34 @@ func init() {
 func init() { proto.RegisterFile("watchtower.proto", fileDescriptor_1ab08d89c8e3c986) }
 
 var fileDescriptor_1ab08d89c8e3c986 = []byte{
-	// 374 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x92, 0xdd, 0x6a, 0xdb, 0x30,
-	0x14, 0xc7, 0xa3, 0x7c, 0xe2, 0xb3, 0x2d, 0x09, 0xca, 0xd8, 0x4c, 0xb6, 0x99, 0xe0, 0xab, 0xb0,
-	0x0b, 0x33, 0x32, 0x06, 0x63, 0x17, 0x81, 0x35, 0xa4, 0x50, 0x0a, 0xa1, 0x18, 0x7a, 0x51, 0x28,
-	0x04, 0xc7, 0x3e, 0x38, 0x26, 0xb1, 0xa5, 0x4a, 0x72, 0xd2, 0xbc, 0x49, 0xdf, 0xa3, 0x2f, 0xd1,
-	0xcb, 0x3e, 0x42, 0x49, 0x5f, 0xa4, 0x58, 0xb6, 0x5b, 0x02, 0xa1, 0x77, 0xe7, 0x7f, 0x3e, 0xa4,
-	0xdf, 0x5f, 0x47, 0xd0, 0xdd, 0x7a, 0xca, 0x5f, 0x2a, 0xb6, 0x45, 0xe1, 0x70, 0xc1, 0x14, 0xa3,
-	0xad, 0x50, 0x70, 0x3f, 0x96, 0xa1, 0xfd, 0x07, 0x1a, 0x53, 0x21, 0x98, 0xa0, 0x14, 0xea, 0x3e,
-	0x0b, 0xd0, 0x24, 0x03, 0x32, 0xac, 0xbb, 0x3a, 0xa6, 0x26, 0xb4, 0x62, 0x94, 0xd2, 0x0b, 0xd1,
-	0xac, 0x0e, 0xc8, 0xd0, 0x70, 0x4b, 0x69, 0xff, 0x04, 0xe3, 0x22, 0x5d, 0xac, 0x23, 0xff, 0x1c,
-	0x77, 0xf4, 0x07, 0x00, 0xd7, 0x62, 0xbe, 0xc2, 0x9d, 0x3e, 0xe0, 0xa3, 0x6b, 0xf0, 0xb2, 0x6c,
-	0xaf, 0x81, 0x5e, 0xf2, 0xc0, 0x53, 0x38, 0x59, 0xa2, 0xbf, 0x72, 0xf1, 0x26, 0x45, 0xa9, 0xe8,
-	0x17, 0x68, 0xf2, 0x74, 0x51, 0x0e, 0x18, 0x6e, 0xa1, 0xe8, 0x18, 0xda, 0x7e, 0x2a, 0x04, 0x26,
-	0x6a, 0x1e, 0xc5, 0x5e, 0x88, 0xd2, 0xac, 0x0e, 0x6a, 0xc3, 0x0f, 0xa3, 0xaf, 0x4e, 0x81, 0xec,
-	0x4c, 0x58, 0xa2, 0xbc, 0x28, 0x41, 0x71, 0x96, 0xd5, 0xdd, 0x4f, 0x45, 0xbb, 0x56, 0xd2, 0x1e,
-	0x43, 0xfb, 0xb0, 0x21, 0x73, 0x96, 0x78, 0x31, 0x16, 0xf7, 0xe8, 0x38, 0x73, 0xb6, 0x41, 0x21,
-	0x23, 0x96, 0x94, 0xce, 0x0a, 0x69, 0xdf, 0x13, 0xe8, 0x1d, 0xe0, 0x4a, 0xce, 0x12, 0x89, 0xf4,
-	0x0a, 0x3a, 0x78, 0xcb, 0xd1, 0x57, 0x18, 0x94, 0x60, 0x44, 0x83, 0xfd, 0x7a, 0x05, 0x3b, 0x32,
-	0xe6, 0x4c, 0x8b, 0x99, 0x9c, 0x6e, 0x9a, 0x28, 0xb1, 0x73, 0xdb, 0x78, 0x90, 0xec, 0xff, 0x87,
-	0xde, 0x91, 0x36, 0xda, 0x85, 0xda, 0xdb, 0xf3, 0x64, 0x21, 0xfd, 0x0c, 0x8d, 0x8d, 0xb7, 0x4e,
-	0xcb, 0x6d, 0xe4, 0xe2, 0x5f, 0xf5, 0x2f, 0x19, 0x5d, 0x03, 0xcc, 0x58, 0x80, 0x39, 0x01, 0x9d,
-	0x41, 0x47, 0x53, 0x9c, 0x32, 0x91, 0x67, 0x24, 0xfd, 0x76, 0x9c, 0x52, 0xef, 0xa2, 0xff, 0xfd,
-	0x3d, 0x0b, 0x76, 0xe5, 0xa4, 0xfb, 0xb0, 0xb7, 0xc8, 0xe3, 0xde, 0x22, 0x4f, 0x7b, 0x8b, 0xdc,
-	0x3d, 0x5b, 0x95, 0x45, 0x53, 0x7f, 0xa3, 0xdf, 0x2f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xe3, 0x84,
-	0x16, 0xc9, 0x5a, 0x02, 0x00, 0x00,
+	// 428 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x52, 0xdd, 0x6a, 0xd4, 0x40,
+	0x14, 0xde, 0xd9, 0xfe, 0x91, 0xa3, 0xdd, 0x5d, 0xa6, 0x52, 0x43, 0xaa, 0x61, 0xc9, 0xd5, 0xe2,
+	0x45, 0x2a, 0x2b, 0x82, 0x78, 0x51, 0xd0, 0x1a, 0x41, 0x94, 0x22, 0x91, 0x5e, 0x08, 0x42, 0xc9,
+	0xcf, 0x31, 0x0d, 0x4d, 0x66, 0xc6, 0x99, 0x49, 0x6b, 0xde, 0xc4, 0xf7, 0xf0, 0x25, 0xbc, 0xf4,
+	0x11, 0x64, 0x7d, 0x11, 0xc9, 0x64, 0xa2, 0x2c, 0xac, 0xbd, 0x3b, 0xdf, 0x39, 0xdf, 0x99, 0xf3,
+	0x7d, 0x73, 0x0e, 0xcc, 0x6e, 0x12, 0x9d, 0x5d, 0x6a, 0x7e, 0x83, 0x32, 0x14, 0x92, 0x6b, 0x4e,
+	0xf7, 0x0a, 0x29, 0xb2, 0x5a, 0x15, 0xde, 0x51, 0xc1, 0x79, 0x51, 0xe1, 0xb1, 0x49, 0xa7, 0xcd,
+	0xe7, 0x63, 0xac, 0x85, 0x6e, 0x7b, 0x56, 0xf0, 0x14, 0x76, 0x22, 0x29, 0xb9, 0xa4, 0x14, 0xb6,
+	0x33, 0x9e, 0xa3, 0x4b, 0xe6, 0x64, 0xb1, 0x1d, 0x9b, 0x98, 0xba, 0xb0, 0x57, 0xa3, 0x52, 0x49,
+	0x81, 0xee, 0x78, 0x4e, 0x16, 0x4e, 0x3c, 0xc0, 0xe0, 0x11, 0x38, 0xef, 0x9b, 0xb4, 0x2a, 0xb3,
+	0xb7, 0xd8, 0xd2, 0x87, 0x00, 0xc2, 0x80, 0x8b, 0x2b, 0x6c, 0xcd, 0x03, 0x77, 0x63, 0x47, 0x0c,
+	0xe5, 0xa0, 0x02, 0x7a, 0x2e, 0xf2, 0x44, 0xe3, 0xe9, 0x25, 0x66, 0x57, 0x31, 0x7e, 0x69, 0x50,
+	0x69, 0x7a, 0x08, 0xbb, 0xa2, 0x49, 0x87, 0x06, 0x27, 0xb6, 0x88, 0x9e, 0xc0, 0x24, 0x6b, 0xa4,
+	0x44, 0xa6, 0x2f, 0xca, 0x3a, 0x29, 0x50, 0xb9, 0xe3, 0xf9, 0xd6, 0xe2, 0xce, 0xf2, 0x7e, 0x68,
+	0xfd, 0x84, 0xa7, 0x9c, 0xe9, 0xa4, 0x64, 0x28, 0xdf, 0x74, 0xf5, 0x78, 0xdf, 0xd2, 0x0d, 0x52,
+	0xc1, 0x09, 0x4c, 0xd6, 0x09, 0x9d, 0x33, 0x96, 0xd4, 0x68, 0xe7, 0x98, 0xb8, 0x73, 0x76, 0x8d,
+	0x52, 0x95, 0x9c, 0x0d, 0xce, 0x2c, 0x0c, 0xbe, 0x13, 0x38, 0x58, 0x93, 0xab, 0x04, 0x67, 0x0a,
+	0xe9, 0x47, 0x98, 0xe2, 0x57, 0x81, 0x99, 0xc6, 0x7c, 0x10, 0x46, 0x8c, 0xb0, 0xc7, 0x7f, 0x85,
+	0x6d, 0x68, 0x0b, 0x23, 0xdb, 0xd3, 0xab, 0x8b, 0x98, 0x96, 0x6d, 0x3c, 0xc1, 0xb5, 0xa4, 0xf7,
+	0x02, 0x0e, 0x36, 0xd0, 0xe8, 0x0c, 0xb6, 0xfe, 0x7d, 0x4f, 0x17, 0xd2, 0x7b, 0xb0, 0x73, 0x9d,
+	0x54, 0xcd, 0xb0, 0x8d, 0x1e, 0x3c, 0x1f, 0x3f, 0x23, 0xcb, 0x4f, 0x00, 0x67, 0x3c, 0xc7, 0x5e,
+	0x01, 0x3d, 0x83, 0xa9, 0x51, 0xf1, 0x9a, 0xcb, 0x3e, 0xa3, 0xe8, 0xd1, 0x66, 0x95, 0x66, 0x17,
+	0xde, 0x83, 0xdb, 0x2c, 0x04, 0xa3, 0xe5, 0x39, 0xec, 0xdb, 0x02, 0x67, 0x5a, 0xf2, 0x8a, 0xbe,
+	0x82, 0xe9, 0x07, 0xd4, 0xef, 0xba, 0x97, 0xb5, 0x9d, 0xf9, 0xbf, 0xfd, 0x78, 0x87, 0x61, 0x7f,
+	0x7f, 0xe1, 0x70, 0x7f, 0x61, 0xd4, 0xdd, 0x5f, 0x30, 0x7a, 0x39, 0xfb, 0xb1, 0xf2, 0xc9, 0xcf,
+	0x95, 0x4f, 0x7e, 0xad, 0x7c, 0xf2, 0xed, 0xb7, 0x3f, 0x4a, 0x77, 0x0d, 0xe7, 0xc9, 0x9f, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x74, 0xf5, 0x05, 0x8a, 0xce, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -359,6 +366,14 @@ type NodeUpdateServer interface {
 	CheckForUpdates(context.Context, *UpdateCheckRequest) (*UpdateCheckResponse, error)
 }
 
+// UnimplementedNodeUpdateServer can be embedded to have forward compatible implementations.
+type UnimplementedNodeUpdateServer struct {
+}
+
+func (*UnimplementedNodeUpdateServer) CheckForUpdates(ctx context.Context, req *UpdateCheckRequest) (*UpdateCheckResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckForUpdates not implemented")
+}
+
 func RegisterNodeUpdateServer(s *grpc.Server, srv NodeUpdateServer) {
 	s.RegisterService(&_NodeUpdate_serviceDesc, srv)
 }
@@ -394,10 +409,82 @@ var _NodeUpdate_serviceDesc = grpc.ServiceDesc{
 	Metadata: "watchtower.proto",
 }
 
+// UpdateControlClient is the client API for UpdateControl service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type UpdateControlClient interface {
+	SetLatestUpdate(ctx context.Context, in *ContainerImage, opts ...grpc.CallOption) (*empty.Empty, error)
+}
+
+type updateControlClient struct {
+	cc *grpc.ClientConn
+}
+
+func NewUpdateControlClient(cc *grpc.ClientConn) UpdateControlClient {
+	return &updateControlClient{cc}
+}
+
+func (c *updateControlClient) SetLatestUpdate(ctx context.Context, in *ContainerImage, opts ...grpc.CallOption) (*empty.Empty, error) {
+	out := new(empty.Empty)
+	err := c.cc.Invoke(ctx, "/grpcmsg.UpdateControl/SetLatestUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// UpdateControlServer is the server API for UpdateControl service.
+type UpdateControlServer interface {
+	SetLatestUpdate(context.Context, *ContainerImage) (*empty.Empty, error)
+}
+
+// UnimplementedUpdateControlServer can be embedded to have forward compatible implementations.
+type UnimplementedUpdateControlServer struct {
+}
+
+func (*UnimplementedUpdateControlServer) SetLatestUpdate(ctx context.Context, req *ContainerImage) (*empty.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetLatestUpdate not implemented")
+}
+
+func RegisterUpdateControlServer(s *grpc.Server, srv UpdateControlServer) {
+	s.RegisterService(&_UpdateControl_serviceDesc, srv)
+}
+
+func _UpdateControl_SetLatestUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContainerImage)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UpdateControlServer).SetLatestUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/grpcmsg.UpdateControl/SetLatestUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UpdateControlServer).SetLatestUpdate(ctx, req.(*ContainerImage))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+var _UpdateControl_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "grpcmsg.UpdateControl",
+	HandlerType: (*UpdateControlServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "SetLatestUpdate",
+			Handler:    _UpdateControl_SetLatestUpdate_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "watchtower.proto",
+}
+
 func (m *Error) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -405,31 +492,38 @@ func (m *Error) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *Error) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Error) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Code != 0 {
-		dAtA[i] = 0x8
-		i++
-		i = encodeVarintWatchtower(dAtA, i, uint64(m.Code))
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if len(m.Message) > 0 {
-		dAtA[i] = 0x12
-		i++
+		i -= len(m.Message)
+		copy(dAtA[i:], m.Message)
 		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Message)))
-		i += copy(dAtA[i:], m.Message)
+		i--
+		dAtA[i] = 0x12
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if m.Code != 0 {
+		i = encodeVarintWatchtower(dAtA, i, uint64(m.Code))
+		i--
+		dAtA[i] = 0x8
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *PublicKey) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -437,26 +531,33 @@ func (m *PublicKey) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *PublicKey) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *PublicKey) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.PublicKey) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.PublicKey)))
-		i += copy(dAtA[i:], m.PublicKey)
-	}
 	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
-	return i, nil
+	if len(m.PublicKey) > 0 {
+		i -= len(m.PublicKey)
+		copy(dAtA[i:], m.PublicKey)
+		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.PublicKey)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
 }
 
 func (m *UpdateCheckRequest) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -464,38 +565,47 @@ func (m *UpdateCheckRequest) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *UpdateCheckRequest) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateCheckRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Pubkey) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Pubkey)))
-		i += copy(dAtA[i:], m.Pubkey)
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if len(m.CurrentImages) > 0 {
-		for _, msg := range m.CurrentImages {
-			dAtA[i] = 0x12
-			i++
-			i = encodeVarintWatchtower(dAtA, i, uint64(msg.Size()))
-			n, err := msg.MarshalTo(dAtA[i:])
-			if err != nil {
-				return 0, err
+		for iNdEx := len(m.CurrentImages) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.CurrentImages[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintWatchtower(dAtA, i, uint64(size))
 			}
-			i += n
+			i--
+			dAtA[i] = 0x12
 		}
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if len(m.Pubkey) > 0 {
+		i -= len(m.Pubkey)
+		copy(dAtA[i:], m.Pubkey)
+		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Pubkey)))
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *ContainerImage) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -503,32 +613,40 @@ func (m *ContainerImage) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *ContainerImage) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ContainerImage) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if len(m.Name) > 0 {
-		dAtA[i] = 0xa
-		i++
-		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Name)))
-		i += copy(dAtA[i:], m.Name)
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
 	}
 	if len(m.Version) > 0 {
-		dAtA[i] = 0x12
-		i++
+		i -= len(m.Version)
+		copy(dAtA[i:], m.Version)
 		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Version)))
-		i += copy(dAtA[i:], m.Version)
+		i--
+		dAtA[i] = 0x12
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
+	if len(m.Name) > 0 {
+		i -= len(m.Name)
+		copy(dAtA[i:], m.Name)
+		i = encodeVarintWatchtower(dAtA, i, uint64(len(m.Name)))
+		i--
+		dAtA[i] = 0xa
 	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func (m *UpdateCheckResponse) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
-	n, err := m.MarshalTo(dAtA)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
 	if err != nil {
 		return nil, err
 	}
@@ -536,41 +654,51 @@ func (m *UpdateCheckResponse) Marshal() (dAtA []byte, err error) {
 }
 
 func (m *UpdateCheckResponse) MarshalTo(dAtA []byte) (int, error) {
-	var i int
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *UpdateCheckResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if len(m.ExpectedImages) > 0 {
-		for k, _ := range m.ExpectedImages {
-			dAtA[i] = 0xa
-			i++
+		for k := range m.ExpectedImages {
 			v := m.ExpectedImages[k]
-			mapSize := 1 + len(k) + sovWatchtower(uint64(len(k))) + 1 + len(v) + sovWatchtower(uint64(len(v)))
-			i = encodeVarintWatchtower(dAtA, i, uint64(mapSize))
-			dAtA[i] = 0xa
-			i++
-			i = encodeVarintWatchtower(dAtA, i, uint64(len(k)))
-			i += copy(dAtA[i:], k)
-			dAtA[i] = 0x12
-			i++
+			baseI := i
+			i -= len(v)
+			copy(dAtA[i:], v)
 			i = encodeVarintWatchtower(dAtA, i, uint64(len(v)))
-			i += copy(dAtA[i:], v)
+			i--
+			dAtA[i] = 0x12
+			i -= len(k)
+			copy(dAtA[i:], k)
+			i = encodeVarintWatchtower(dAtA, i, uint64(len(k)))
+			i--
+			dAtA[i] = 0xa
+			i = encodeVarintWatchtower(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0xa
 		}
 	}
-	if m.XXX_unrecognized != nil {
-		i += copy(dAtA[i:], m.XXX_unrecognized)
-	}
-	return i, nil
+	return len(dAtA) - i, nil
 }
 
 func encodeVarintWatchtower(dAtA []byte, offset int, v uint64) int {
+	offset -= sovWatchtower(v)
+	base := offset
 	for v >= 1<<7 {
 		dAtA[offset] = uint8(v&0x7f | 0x80)
 		v >>= 7
 		offset++
 	}
 	dAtA[offset] = uint8(v)
-	return offset + 1
+	return base
 }
 func (m *Error) Size() (n int) {
 	if m == nil {
@@ -670,14 +798,7 @@ func (m *UpdateCheckResponse) Size() (n int) {
 }
 
 func sovWatchtower(x uint64) (n int) {
-	for {
-		n++
-		x >>= 7
-		if x == 0 {
-			break
-		}
-	}
-	return n
+	return (math_bits.Len64(x|1) + 6) / 7
 }
 func sozWatchtower(x uint64) (n int) {
 	return sovWatchtower(uint64((x << 1) ^ uint64((int64(x) >> 63))))
@@ -1297,6 +1418,7 @@ func (m *UpdateCheckResponse) Unmarshal(dAtA []byte) error {
 func skipWatchtower(dAtA []byte) (n int, err error) {
 	l := len(dAtA)
 	iNdEx := 0
+	depth := 0
 	for iNdEx < l {
 		var wire uint64
 		for shift := uint(0); ; shift += 7 {
@@ -1328,10 +1450,8 @@ func skipWatchtower(dAtA []byte) (n int, err error) {
 					break
 				}
 			}
-			return iNdEx, nil
 		case 1:
 			iNdEx += 8
-			return iNdEx, nil
 		case 2:
 			var length int
 			for shift := uint(0); ; shift += 7 {
@@ -1352,55 +1472,30 @@ func skipWatchtower(dAtA []byte) (n int, err error) {
 				return 0, ErrInvalidLengthWatchtower
 			}
 			iNdEx += length
-			if iNdEx < 0 {
-				return 0, ErrInvalidLengthWatchtower
-			}
-			return iNdEx, nil
 		case 3:
-			for {
-				var innerWire uint64
-				var start int = iNdEx
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return 0, ErrIntOverflowWatchtower
-					}
-					if iNdEx >= l {
-						return 0, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					innerWire |= (uint64(b) & 0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
-				innerWireType := int(innerWire & 0x7)
-				if innerWireType == 4 {
-					break
-				}
-				next, err := skipWatchtower(dAtA[start:])
-				if err != nil {
-					return 0, err
-				}
-				iNdEx = start + next
-				if iNdEx < 0 {
-					return 0, ErrInvalidLengthWatchtower
-				}
-			}
-			return iNdEx, nil
+			depth++
 		case 4:
-			return iNdEx, nil
+			if depth == 0 {
+				return 0, ErrUnexpectedEndOfGroupWatchtower
+			}
+			depth--
 		case 5:
 			iNdEx += 4
-			return iNdEx, nil
 		default:
 			return 0, fmt.Errorf("proto: illegal wireType %d", wireType)
 		}
+		if iNdEx < 0 {
+			return 0, ErrInvalidLengthWatchtower
+		}
+		if depth == 0 {
+			return iNdEx, nil
+		}
 	}
-	panic("unreachable")
+	return 0, io.ErrUnexpectedEOF
 }
 
 var (
-	ErrInvalidLengthWatchtower = fmt.Errorf("proto: negative length found during unmarshaling")
-	ErrIntOverflowWatchtower   = fmt.Errorf("proto: integer overflow")
+	ErrInvalidLengthWatchtower        = fmt.Errorf("proto: negative length found during unmarshaling")
+	ErrIntOverflowWatchtower          = fmt.Errorf("proto: integer overflow")
+	ErrUnexpectedEndOfGroupWatchtower = fmt.Errorf("proto: unexpected end of group")
 )
