@@ -1,6 +1,8 @@
 syntax = "proto3";
 package grpcmsg;
 
+import "google/protobuf/empty.proto";
+
 // ------------------------
 // Common structs
 // ------------------------
@@ -22,6 +24,10 @@ message PublicKey {
 
 service NodeUpdate {
     rpc CheckForUpdates(UpdateCheckRequest) returns (UpdateCheckResponse) {}
+}
+
+service UpdateControl {
+    rpc SetLatestUpdate(ContainerImage) returns (google.protobuf.Empty) {}
 }
 
 message UpdateCheckRequest {
