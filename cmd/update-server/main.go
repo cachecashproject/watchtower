@@ -33,6 +33,8 @@ func loadConfigFile(l *logrus.Logger, path string) (*server.ConfigFile, error) {
 	}
 
 	conf.GrpcAddr = p.GetString("grpc_addr", ":4000")
+	conf.ControlAddr = p.GetString("control_addr", ":4001")
+
 	conf.Database = p.GetString("database", "host=127.0.0.1 port=5432 user=postgres dbname=updates sslmode=disable")
 
 	return &conf, nil
@@ -106,7 +108,12 @@ func mainC() error {
 		return nil
 	}
 
-	app, err := server.NewApplication(l, u, cf)
+	c, err := server.NewUpdateControl(l, db)
+	if err != nil {
+		return nil
+	}
+
+	app, err := server.NewApplication(l, u, c, cf)
 	if err != nil {
 		return errors.Wrap(err, "failed to create update server application")
 	}
