@@ -18,86 +18,71 @@ type Application interface {
 
 // ConfigFile holds the configuration of our server
 type ConfigFile struct {
-	GrpcAddr string `json:"grpc_addr"`
-	Database string `json:"database"`
+	GrpcAddr    string `json:"grpc_addr"`
+	ControlAddr string `json:"control_addr"`
+	Database    string `json:"database"`
 }
 
 type application struct {
-	l            *logrus.Logger
-	updateServer *updateServer
+	conf          *ConfigFile
+	l             *logrus.Logger
+	updateServer  *grpc.Server
+	controlServer *grpc.Server
 }
 
 var _ Application = (*application)(nil)
 
 // NewApplication creates a new grpc service
-func NewApplication(l *logrus.Logger, u *UpdateServer, conf *ConfigFile) (Application, error) {
-	updateServer, err := newUpdateServer(l, u, conf)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to create update server")
-	}
+func NewApplication(l *logrus.Logger, u *UpdateServer, c *UpdateControl, conf *ConfigFile) (Application, error) {
+	updateServer := common.NewGRPCServer()
+	grpcmsg.RegisterNodeUpdateServer(updateServer, u)
+
+	controlServer := common.NewGRPCServer()
+	grpcmsg.RegisterUpdateControlServer(controlServer, c)
 
 	return &application{
-		l:            l,
-		updateServer: updateServer,
+		l:             l,
+		conf:          conf,
+		updateServer:  updateServer,
+		controlServer: controlServer,
 	}, nil
 }
 
 func (a *application) Start() error {
-	if err := a.updateServer.Start(); err != nil {
+	if err := Start("updateServer", a.updateServer, a.l, a.conf.GrpcAddr); err != nil {
 		return errors.Wrap(err, "failed to start update server")
 	}
+
+	if err := Start("controlServer", a.controlServer, a.l, a.conf.ControlAddr); err != nil {
+		return errors.Wrap(err, "failed to start update server")
+	}
+
 	return nil
 }
 
 func (a *application) Shutdown(ctx context.Context) error {
-	if err := a.updateServer.Shutdown(ctx); err != nil {
-		return errors.Wrap(err, "failed to shut down update server")
-	}
+	a.controlServer.GracefulStop()
+	a.updateServer.GracefulStop()
 	return nil
 }
 
-type updateServer struct {
-	l          *logrus.Logger
-	conf       *ConfigFile
-	update     *UpdateServer
-	grpcServer *grpc.Server
-}
+// Start starts a grpc.Server -- some logging is provided via the tag and
+// logrus arguments, and the addr is used for dialing to.
+func Start(tag string, s *grpc.Server, l *logrus.Logger, addr string) error {
+	l.Infof("%s - Start - enter", tag)
 
-var _ common.StarterShutdowner = (*updateServer)(nil)
-
-func newUpdateServer(l *logrus.Logger, u *UpdateServer, conf *ConfigFile) (*updateServer, error) {
-	grpcServer := common.NewGRPCServer()
-	grpcmsg.RegisterNodeUpdateServer(grpcServer, &grpcUpdateServer{update: u})
-
-	return &updateServer{
-		l:          l,
-		conf:       conf,
-		update:     u,
-		grpcServer: grpcServer,
-	}, nil
-}
-
-func (s *updateServer) Start() error {
-	s.l.Info("updateServer - Start - enter")
-
-	grpcLis, err := net.Listen("tcp", s.conf.GrpcAddr)
+	grpcLis, err := net.Listen("tcp", addr)
 	if err != nil {
 		return errors.Wrap(err, "failed to bind listener")
 	}
 
 	go func() {
 		// This will block until we call `Stop`.
-		if err := s.grpcServer.Serve(grpcLis); err != nil {
-			s.l.WithError(err).Error("failed to serve updateServer(grpc)")
+		if err := s.Serve(grpcLis); err != nil {
+			l.WithError(err).Errorf("failed to serve %s(grpc)", tag)
 		}
 	}()
 
-	s.l.Info("updateServer - Start - exit")
-	return nil
-}
-
-func (s *updateServer) Shutdown(ctx context.Context) error {
-	// TODO: Should use `GracefulStop` until context expires, and then fall back on `Stop`.
-	s.grpcServer.Stop()
+	l.Infof("%s - Start - exit", tag)
 	return nil
 }

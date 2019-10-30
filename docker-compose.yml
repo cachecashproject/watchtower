@@ -1,6 +1,16 @@
 ---
 version: '3.7'
 services:
+  watchtower:
+    image: cachecash/watchtower
+    command: -interval 30 -debug -enable-insecure-transport -update-server server:4000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    links:
+      - server:server
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
   server:
     image: cachecash/watchtower-server
     command: -logLevel debug
@@ -8,11 +18,11 @@ services:
       context: .
       dockerfile: Dockerfile-server
     ports:
-    - 8080:8080
-    - 4000:4000
+    - 127.0.0.1:8080:8080
+    - 127.0.0.1:4000:4000
+    - 127.0.0.1:4001:4001
     environment:
     - UPDATE_SERVER_DATABASE=host=db port=5432 user=postgres dbname=updates sslmode=disable
-
   db:
     image: postgres:11
     ports:
